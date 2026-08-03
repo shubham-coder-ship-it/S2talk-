@@ -6,3 +6,8 @@ venv/
 node_modules/
 *.db
 .vscode/
+# Ignore uploaded user files
+static/uploads/avatars/
+static/uploads/resumes/
+static/uploads/videos/
+static/uploads/images/
