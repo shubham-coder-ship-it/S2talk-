@@ -1,0 +1,630 @@
+/* =====================================================================
+   S2 TALK — AUTH & WELCOME UI REDESIGN  ·  "Modern Premium" dark/gold
+   Scope: #landing, #signup, #login, #forgot, #intro screens ONLY.
+   Nothing here touches Flask routes, JS logic, element IDs, or any
+   other screen (#game, #modal, admin panel, etc).
+   Loaded AFTER style.css so these rules take priority for the ids above.
+   ===================================================================== */
+
+:root{
+  /* ---- Modern Premium palette ---- */
+  --ax-bg:#111111;
+  --ax-bg2:#1b1b1b;
+  --ax-accent:#f6a300;
+  --ax-accent-2:#ffc247;
+  --ax-accent-deep:#c97e00;
+  --ax-card:rgba(27,27,27,0.72);
+  --ax-card-border:rgba(246,163,0,0.18);
+  --ax-ink:#ffffff;
+  --ax-ink-dim:#a9a9b2;
+  --ax-gradient: linear-gradient(135deg, var(--ax-accent), var(--ax-accent-2));
+  --ax-gradient-3: linear-gradient(150deg, #0d0d0d 0%, #1c1508 45%, #241a06 75%, #120c02 100%);
+  --ax-shadow-soft: 0 24px 60px rgba(0,0,0,0.55);
+  --ax-shadow-btn: 0 12px 28px rgba(246,163,0,0.30);
+  --ax-glow: 0 0 0 1px rgba(246,163,0,0.14), 0 0 32px rgba(246,163,0,0.18);
+  --ax-radius-lg: 26px;
+  --ax-radius-md: 18px;
+  --ax-radius-sm: 14px;
+
+  /* legacy aliases kept so any un-migrated rule below still resolves */
+  --ax-blue:#f6a300;
+  --ax-purple:#ffc247;
+  --ax-pink:#f6a300;
+}
+
+/* ---------------------------------------------------------------
+   Shared building blocks
+   --------------------------------------------------------------- */
+#landing, #signup, #login, #forgot, #intro{
+  font-family: var(--font-body);
+  background: var(--ax-bg);
+  color: var(--ax-ink);
+}
+
+.authx-shell{
+  width:100%; min-height:100%; display:grid;
+  grid-template-columns: 1.05fr 1fr;
+  align-items:stretch;
+}
+
+/* ---- Left illustration panel ---- */
+.authx-illustration{
+  position:relative; overflow:hidden; display:flex; flex-direction:column;
+  justify-content:center; align-items:center; text-align:center; padding:56px 48px;
+  background: var(--ax-gradient-3);
+  background-size:220% 220%;
+  animation: axGradientMove 16s ease-in-out infinite;
+  color:#fff;
+  min-height: 320px;
+}
+/* Landing keeps its skyline + copy perfectly centered as a unit */
+#landing .authx-illustration{ justify-content:center; align-items:center; }
+#landing .authx-illustration-copy{ margin-top:0; }
+#landing .authx-skyline{ position:relative; height:auto; margin-top:28px; opacity:1; }
+
+#signup .authx-illustration, #login .authx-illustration{
+  justify-content:center; align-items:center; text-align:center;
+  padding:48px 56px;
+}
+#signup .authx-illustration .authx-illustration-copy,
+#login .authx-illustration .authx-illustration-copy{
+  margin-top:0; display:flex; flex-direction:column; align-items:center;
+}
+#signup .authx-illustration .authx-desc,
+#login .authx-illustration .authx-desc{ margin-left:auto; margin-right:auto; }
+#signup .authx-illustration .authx-feature-grid,
+#login .authx-illustration .authx-feature-grid{ justify-content:center; }
+@keyframes axGradientMove{
+  0%{background-position:0% 30%;}
+  50%{background-position:100% 70%;}
+  100%{background-position:0% 30%;}
+}
+
+/* ---- Ambient AI-core glow behind the illustration copy ---- */
+.authx-illustration::before{
+  content:''; position:absolute; left:50%; top:50%; width:520px; height:520px;
+  transform:translate(-50%,-50%); pointer-events:none; z-index:0;
+  background: radial-gradient(circle, rgba(246,163,0,0.20) 0%, rgba(246,163,0,0.06) 40%, transparent 70%);
+  animation: axCoreBreathe 6s ease-in-out infinite;
+}
+@keyframes axCoreBreathe{
+  0%,100%{ opacity:.7; transform:translate(-50%,-50%) scale(0.92); }
+  50%{ opacity:1; transform:translate(-50%,-50%) scale(1.06); }
+}
+/* thin rotating orbit rings — subtle "AI city" premium lighting cue */
+.authx-illustration::after{
+  content:''; position:absolute; left:50%; top:50%; width:340px; height:340px;
+  transform:translate(-50%,-50%); pointer-events:none; z-index:0; border-radius:50%;
+  border:1px solid rgba(246,163,0,0.16);
+  box-shadow: 0 0 0 40px rgba(246,163,0,0.03), 0 0 0 80px rgba(246,163,0,0.02);
+  animation: axRingSpin 22s linear infinite;
+}
+@keyframes axRingSpin{ to{ transform:translate(-50%,-50%) rotate(360deg); } }
+
+.authx-blob{
+  position:absolute; border-radius:50%; filter:blur(8px);
+  background:radial-gradient(circle, rgba(246,163,0,0.22), transparent 70%); pointer-events:none;
+  animation: axFloat 7s ease-in-out infinite; z-index:0;
+}
+.authx-blob-a{ width:260px; height:260px; top:-70px; right:-60px; animation-duration:9s; }
+.authx-blob-b{ width:180px; height:180px; bottom:10%; left:-50px; animation-duration:11s; animation-delay:.6s; }
+.authx-blob-c{ width:120px; height:120px; top:38%; right:12%; animation-duration:8s; animation-delay:1.2s; }
+@keyframes axFloat{
+  0%,100%{ transform:translateY(0) translateX(0); }
+  50%{ transform:translateY(-22px) translateX(10px); }
+}
+
+.authx-particles{ position:absolute; inset:0; pointer-events:none; z-index:0; }
+.authx-particles span{
+  position:absolute; width:3px; height:3px; border-radius:50%;
+  background:var(--ax-accent-2); box-shadow:0 0 10px 2px rgba(246,163,0,0.65);
+  animation: axParticle 6s linear infinite;
+  opacity:0; bottom:0;
+}
+.authx-particles span:nth-child(1){ left:8%;  animation-delay:0s;   }
+.authx-particles span:nth-child(2){ left:20%; animation-delay:1.1s; }
+.authx-particles span:nth-child(3){ left:34%; animation-delay:2.3s; }
+.authx-particles span:nth-child(4){ left:48%; animation-delay:.6s;  }
+.authx-particles span:nth-child(5){ left:62%; animation-delay:3.1s; }
+.authx-particles span:nth-child(6){ left:74%; animation-delay:1.8s; }
+.authx-particles span:nth-child(7){ left:86%; animation-delay:2.7s; }
+.authx-particles span:nth-child(8){ left:94%; animation-delay:.2s;  }
+@keyframes axParticle{
+  0%{ transform:translateY(20px); opacity:0; }
+  15%{ opacity:1; }
+  85%{ opacity:1; }
+  100%{ transform:translateY(-260px); opacity:0; }
+}
+
+/* skyline made of pure CSS, no image assets — premium glass towers */
+.authx-skyline{
+  position:absolute; left:0; right:0; bottom:0; height:46%; z-index:1;
+  display:flex; align-items:flex-end; justify-content:center; gap:10px; padding:0 30px;
+  opacity:.95;
+}
+.authx-building{
+  flex:none; width:var(--w, 46px); height:var(--h, 90px);
+  background:linear-gradient(180deg, rgba(246,163,0,0.20), rgba(255,255,255,0.03));
+  border-radius:8px 8px 0 0; position:relative; overflow:hidden;
+  animation: axBuildingRise .9s cubic-bezier(.2,.8,.2,1) both, axBuildingGlow 4s ease-in-out infinite;
+  animation-delay: var(--d, 0s), var(--d, 0s);
+  box-shadow: inset 0 0 0 1px rgba(246,163,0,0.22), 0 0 18px rgba(246,163,0,0.06);
+}
+.authx-building::before{
+  content:''; position:absolute; inset:6px; background-image:
+    repeating-linear-gradient(0deg, rgba(255,194,71,0.45) 0 5px, transparent 5px 13px),
+    repeating-linear-gradient(90deg, rgba(255,194,71,0.25) 0 5px, transparent 5px 13px);
+  background-size: 100% 13px, 13px 100%;
+  opacity:.4; mix-blend-mode:screen;
+}
+@keyframes axBuildingRise{
+  0%{ transform:translateY(40px); opacity:0; }
+  100%{ transform:translateY(0); opacity:1; }
+}
+@keyframes axBuildingGlow{
+  0%,100%{ box-shadow: inset 0 0 0 1px rgba(246,163,0,0.22), 0 0 18px rgba(246,163,0,0.06); }
+  50%{ box-shadow: inset 0 0 0 1px rgba(255,194,71,0.4), 0 0 26px rgba(246,163,0,0.16); }
+}
+
+.authx-illustration-copy{ position:relative; z-index:2; margin-top:26px; }
+.authx-eyebrow{
+  font-family:var(--font-display); font-weight:700; letter-spacing:3px; font-size:12.5px;
+  color:var(--ax-accent-2); opacity:.95; margin-bottom:4px;
+}
+.authx-title{
+  font-family:var(--font-display); font-weight:800; font-size:clamp(34px,4.4vw,52px);
+  margin:0 0 12px; line-height:1.05; letter-spacing:.2px;
+  text-shadow:0 8px 30px rgba(0,0,0,0.55);
+}
+.authx-title span{ color:var(--ax-accent-2); text-shadow:0 0 24px rgba(246,163,0,0.5); }
+.authx-desc{
+  max-width:440px; font-size:15px; line-height:1.7; opacity:.82; margin:0 auto 24px; color:#ECECEC;
+}
+.authx-feature-grid{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
+.authx-feature{
+  display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600;
+  background:rgba(255,255,255,0.05); border:1px solid rgba(246,163,0,0.22);
+  padding:8px 13px; border-radius:999px; backdrop-filter:blur(6px); color:#fff;
+  transition: transform .2s ease, background .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.authx-feature:hover{
+  transform:translateY(-4px) scale(1.04); background:rgba(246,163,0,0.14);
+  border-color:rgba(246,163,0,0.5); box-shadow:0 10px 24px rgba(246,163,0,0.22);
+}
+.authx-feature-icon{ font-size:16px; }
+
+/* ---- Right glass panel wrap ---- */
+.authx-panel-wrap{
+  position:relative; display:flex; align-items:center; justify-content:center;
+  padding:40px 34px; overflow:auto;
+  background:
+    radial-gradient(480px 320px at 90% 0%, rgba(246,163,0,0.07), transparent 60%),
+    radial-gradient(420px 300px at 5% 100%, rgba(246,163,0,0.05), transparent 60%),
+    var(--ax-bg);
+}
+.authx-panel{
+  position:relative; width:100%; max-width:460px;
+  background:var(--ax-card); border:1px solid var(--ax-card-border);
+  border-radius:var(--ax-radius-lg); padding:40px 36px 32px;
+  box-shadow: var(--ax-shadow-soft), var(--ax-glow);
+  backdrop-filter:blur(22px) saturate(140%); -webkit-backdrop-filter:blur(22px) saturate(140%);
+  animation: axCardIn .6s cubic-bezier(.2,.8,.2,1) both, axCardFloat 7s ease-in-out infinite 1s;
+}
+@keyframes axCardIn{
+  0%{ opacity:0; transform:translateY(26px) scale(.98); }
+  100%{ opacity:1; transform:translateY(0) scale(1); }
+}
+@keyframes axCardFloat{
+  0%,100%{ transform:translateY(0); }
+  50%{ transform:translateY(-6px); }
+}
+.authx-logo-badge{
+  width:52px; height:52px; border-radius:16px; background:var(--ax-gradient);
+  display:flex; align-items:center; justify-content:center; color:#151515;
+  font-family:var(--font-display); font-weight:800; font-size:18px;
+  box-shadow:var(--ax-shadow-btn); margin-bottom:18px;
+  animation: axFloat 5s ease-in-out infinite;
+}
+.authx-panel-title{
+  font-family:var(--font-display); font-weight:800; color:var(--ax-ink);
+  font-size:clamp(24px,2.6vw,30px); margin:0 0 6px; line-height:1.2; letter-spacing:.2px;
+}
+.authx-panel-title span{
+  background:var(--ax-gradient); -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.authx-panel-desc{
+  color:var(--ax-ink-dim) !important; font-size:14px !important; line-height:1.65 !important;
+  max-width:100% !important; margin:0 0 26px !important;
+}
+.authx-footer{
+  position:static !important; text-align:center; margin-top:22px; font-size:12px;
+  color:var(--ax-ink-dim); letter-spacing:.3px;
+}
+
+/* ---- Premium gradient buttons (scoped to auth screens only) ---- */
+#landing .btn, #signup .btn, #login .btn, #forgot .btn, #intro .btn{
+  border-radius:16px; font-size:15px; padding:15px 26px; position:relative; overflow:hidden;
+  transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .22s ease, filter .18s ease;
+  letter-spacing:.2px;
+}
+#landing .btn-primary, #signup .btn-primary, #login .btn-primary, #forgot .btn-primary, #intro .btn-primary{
+  background:var(--ax-gradient); box-shadow:var(--ax-shadow-btn); color:#171208; border:none; font-weight:800;
+}
+#landing .btn-primary:hover, #signup .btn-primary:hover, #login .btn-primary:hover, #forgot .btn-primary:hover, #intro .btn-primary:hover{
+  transform:translateY(-3px) scale(1.015);
+  box-shadow:0 18px 40px rgba(246,163,0,0.5), 0 0 0 1px rgba(255,194,71,0.4), 0 0 30px rgba(246,163,0,0.35);
+  filter:brightness(1.06);
+}
+#landing .btn-primary:active, #signup .btn-primary:active, #login .btn-primary:active, #forgot .btn-primary:active, #intro .btn-primary:active{
+  transform:translateY(0) scale(.96); box-shadow:0 6px 16px rgba(246,163,0,0.35); filter:brightness(.98);
+  transition: transform .08s ease, box-shadow .08s ease;
+}
+#landing .btn-outline, #login .btn-outline{
+  background:rgba(246,163,0,0.06); color:var(--ax-accent-2); border:2px solid rgba(246,163,0,0.55);
+}
+#landing .btn-outline:hover, #login .btn-outline:hover{
+  background:rgba(246,163,0,0.14); border-color:var(--ax-accent-2); transform:translateY(-3px);
+  box-shadow:0 14px 30px rgba(246,163,0,0.28);
+}
+#landing .btn-outline:active, #login .btn-outline:active{ transform:translateY(0) scale(.96); }
+/* button ripple */
+#landing .btn::after, #signup .btn::after, #login .btn::after, #forgot .btn::after, #intro .btn::after{
+  content:''; position:absolute; border-radius:50%; background:rgba(255,255,255,0.55);
+  width:8px; height:8px; left:var(--rx,50%); top:var(--ry,50%);
+  transform:translate(-50%,-50%) scale(0); opacity:0; pointer-events:none;
+}
+#landing .btn.ax-rippling::after, #signup .btn.ax-rippling::after, #login .btn.ax-rippling::after,
+#forgot .btn.ax-rippling::after, #intro .btn.ax-rippling::after{
+  animation: axRipple .55s ease-out;
+}
+@keyframes axRipple{
+  0%{ transform:translate(-50%,-50%) scale(0); opacity:.55; }
+  100%{ transform:translate(-50%,-50%) scale(22); opacity:0; }
+}
+
+.authx-btn-row{ display:flex; flex-direction:column; gap:12px; margin-top:6px; }
+.authx-btn-row .btn{ width:100%; }
+
+/* ---------------------------------------------------------------
+   Signup / Login / Forgot cards
+   --------------------------------------------------------------- */
+#signup .authx-shell, #login .authx-shell{ grid-template-columns:1fr 1.05fr; }
+#signup .authx-panel-wrap, #login .authx-panel-wrap{ order:2; }
+#signup .authx-illustration, #login .authx-illustration{ order:1; }
+
+.authx-form-card{
+  width:100%; max-width:480px; background:var(--ax-card); border:1px solid var(--ax-card-border);
+  border-radius:var(--ax-radius-lg); padding:36px 34px 28px; box-shadow:var(--ax-shadow-soft), var(--ax-glow);
+  backdrop-filter:blur(22px) saturate(140%); -webkit-backdrop-filter:blur(22px) saturate(140%);
+  animation: axCardIn .6s cubic-bezier(.2,.8,.2,1) both;
+  max-height:92vh; overflow-y:auto;
+}
+.authx-form-card::-webkit-scrollbar{ width:7px; }
+.authx-form-card::-webkit-scrollbar-thumb{ background:rgba(246,163,0,0.3); border-radius:4px; }
+
+.authx-form-card h2{
+  font-family:var(--font-display); font-weight:800; color:var(--ax-ink);
+  font-size:26px; margin:0 0 4px; letter-spacing:.2px;
+}
+.authx-form-card .hint{
+  color:var(--ax-ink-dim) !important; font-size:13px !important; margin-bottom:22px !important;
+}
+
+/* Floating-icon inputs */
+.authx-field{ margin-bottom:16px; position:relative; }
+.authx-field label{
+  display:block; font-size:11.5px; font-weight:700; color:var(--ax-ink-dim);
+  margin-bottom:7px; text-transform:uppercase; letter-spacing:.7px;
+}
+.authx-input-wrap{ position:relative; }
+.authx-input-icon{
+  position:absolute; left:14px; top:50%; transform:translateY(-50%);
+  font-size:15px; opacity:.7; pointer-events:none; z-index:2;
+}
+.authx-field input[type=text],
+.authx-field input[type=email],
+.authx-field input[type=password],
+.authx-field textarea{
+  width:100%; padding:13px 14px 13px 40px; border-radius:14px;
+  border:1.5px solid rgba(255,255,255,0.10); background:rgba(255,255,255,0.04);
+  color:var(--ax-ink); font-size:14.5px; outline:none;
+  transition: border .18s ease, box-shadow .18s ease, background .18s ease;
+  position:relative; z-index:1; pointer-events:auto; -webkit-user-select:text; user-select:text;
+}
+.authx-field input::placeholder, .authx-field textarea::placeholder{ color:#75757e; }
+.authx-field textarea{ padding-left:14px; }
+.authx-field input:focus, .authx-field textarea:focus{
+  border-color:var(--ax-accent); background:rgba(246,163,0,0.06);
+  box-shadow: 0 0 0 4px rgba(246,163,0,0.14);
+}
+.authx-field input[type=file]{
+  padding-left:14px; font-size:12.5px; color:var(--ax-ink-dim);
+}
+
+/* password show/hide eye toggle */
+.authx-pw-wrap{ position:relative; }
+.authx-pw-wrap input{
+  padding-right:46px !important;
+  width:100% !important;
+  box-sizing:border-box !important;
+  text-overflow:ellipsis !important;
+  overflow:hidden !important;
+}
+.authx-pw-toggle{
+  position:absolute; right:6px; top:50%; transform:translateY(-50%);
+  width:34px; height:34px; border:none; background:transparent; cursor:pointer;
+  font-size:16px; display:flex; align-items:center; justify-content:center;
+  color:var(--ax-ink-dim); border-radius:8px; transition:.15s; z-index:3;
+  flex-shrink:0;
+}
+.authx-pw-toggle:hover{ background:rgba(246,163,0,0.14); color:var(--ax-accent-2); }
+.authx-pw-toggle:focus-visible{ outline:2px solid var(--ax-accent); outline-offset:2px; }
+
+.authx-two-col{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+
+/* upload dropzone-style pieces */
+.authx-avatar-row{ display:flex; align-items:center; gap:16px; margin-bottom:18px; }
+.authx-avatar-preview{
+  width:72px; height:72px; border-radius:50%; background:var(--ax-gradient);
+  display:flex; align-items:center; justify-content:center; font-size:28px; color:#171208;
+  overflow:hidden; border:3px solid rgba(255,255,255,0.08); box-shadow:var(--ax-shadow-btn); flex-shrink:0;
+  animation: axFloat 6s ease-in-out infinite;
+}
+.authx-avatar-preview img{ width:100%; height:100%; object-fit:cover; }
+.authx-avatar-upload-label{ font-size:12px; font-weight:700; color:var(--ax-ink-dim); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; display:block; }
+.authx-file-btn{
+  font-size:12.5px; color:var(--ax-ink-dim);
+}
+
+.authx-err{
+  color:#ff6b6b; font-size:12.5px; margin:-6px 0 12px; display:none;
+  animation: axShake .32s ease;
+}
+@keyframes axShake{
+  0%,100%{ transform:translateX(0); } 25%{ transform:translateX(-5px); } 75%{ transform:translateX(5px); }
+}
+
+.authx-switch-line{ font-size:13px; color:var(--ax-ink-dim); margin-top:16px; text-align:center; }
+.authx-switch-line a{ color:var(--ax-accent-2); font-weight:700; text-decoration:none; cursor:pointer; }
+.authx-switch-line a:hover{ text-decoration:underline; }
+
+/* Loading state on submit buttons */
+#signup .btn-primary.ax-loading, #login .btn-primary.ax-loading, #forgot .btn-primary.ax-loading{
+  color:transparent !important; pointer-events:none;
+}
+#signup .btn-primary.ax-loading::before, #login .btn-primary.ax-loading::before, #forgot .btn-primary.ax-loading::before{
+  content:''; position:absolute; inset:0; margin:auto; width:20px; height:20px;
+  border:2.5px solid rgba(20,15,5,0.35); border-top-color:#171208; border-radius:50%;
+  animation: axSpin .7s linear infinite;
+}
+@keyframes axSpin{ to{ transform:rotate(360deg); } }
+
+/* ---- Forgot password: single centered card (no split) ---- */
+#forgot{ align-items:center; justify-content:center; padding:40px 20px; }
+#forgot .authx-form-card{ max-width:420px; }
+.authx-otp-timer{
+  color:var(--ax-ink-dim) !important; font-size:12.5px !important; margin:-8px 0 12px !important;
+}
+
+/* =====================================================================
+   INTRO / "YOUR CITY AWAITS"
+   ===================================================================== */
+#intro{
+  position:relative; overflow:hidden; height:100vh; padding:18px 20px;
+  align-items:center; justify-content:center;
+  background:
+    radial-gradient(900px 500px at 50% -10%, rgba(246,163,0,0.12), transparent 60%),
+    radial-gradient(600px 400px at 80% 90%, rgba(91,79,232,0.08), transparent 60%),
+    var(--ax-bg);
+}
+#intro.active{ display:flex; }
+.authx-city-hero{
+  max-width:800px; margin:0 auto; text-align:center; position:relative; z-index:2;
+  width:100%; max-height:100%; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:10px;
+}
+
+/* ---- Glowing avatar ring wrap ---- */
+.authx-city-avatar-glow-wrap{
+  position:relative; display:flex; align-items:center; justify-content:center;
+  margin:0 auto;
+}
+.authx-city-avatar-glow-ring{
+  position:absolute; width:90px; height:90px; border-radius:50%;
+  background: radial-gradient(circle, rgba(246,163,0,0.55) 0%, rgba(246,163,0,0.10) 60%, transparent 80%);
+  animation: axGlowPulse 2.8s ease-in-out infinite; z-index:0;
+}
+@keyframes axGlowPulse{
+  0%,100%{ transform:scale(0.85); opacity:0.7; }
+  50%{ transform:scale(1.2); opacity:1; }
+}
+.authx-city-avatar-wrap{
+  width:64px; height:64px; border-radius:20px; position:relative; z-index:1;
+  background:var(--ax-gradient); display:flex; align-items:center; justify-content:center;
+  font-size:30px;
+  box-shadow: var(--ax-shadow-btn), 0 0 0 3px rgba(246,163,0,0.35), 0 0 30px rgba(246,163,0,0.45);
+  animation:axFloat 3.4s ease-in-out infinite;
+  flex-shrink:0;
+}
+.authx-city-title{
+  font-family:var(--font-display); font-weight:800; font-size:clamp(20px,3.2vw,30px);
+  background:var(--ax-gradient); -webkit-background-clip:text; background-clip:text; color:transparent;
+  margin:0; line-height:1.15;
+  filter: drop-shadow(0 2px 12px rgba(246,163,0,0.35));
+}
+.authx-city-sub{
+  color:rgba(255,255,255,0.65); font-size:11px; letter-spacing:1.5px; margin:0 0 2px;
+  font-weight:600;
+}
+
+/* ---- Premium ID card — high contrast ---- */
+.authx-id-card{
+  display:inline-flex; align-items:center; gap:10px; max-width:360px; width:100%;
+  background:var(--ax-card); border:1px solid var(--ax-card-border); border-radius:16px;
+  padding:10px 16px; box-shadow:var(--ax-shadow-soft); cursor:pointer;
+  backdrop-filter:blur(16px); transition: transform .18s ease, box-shadow .18s ease;
+}
+.authx-id-card:hover{ transform:translateY(-2px); box-shadow:0 14px 30px rgba(246,163,0,0.25); }
+
+/* Premium variant with stronger background and border */
+.authx-id-card-premium{
+  background: rgba(30, 27, 20, 0.92) !important;
+  border: 1.5px solid rgba(246,163,0,0.40) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.65), 0 0 0 1px rgba(246,163,0,0.15), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+  backdrop-filter:blur(24px) saturate(160%) !important;
+}
+
+.authx-id-pic{
+  width:40px; height:40px; border-radius:50%; overflow:hidden; background:var(--ax-gradient);
+  display:flex; align-items:center; justify-content:center; font-size:19px; color:#171208; flex-shrink:0;
+}
+.authx-id-pic img{ width:100%; height:100%; object-fit:cover; }
+
+/* Glowing avatar pic in id-card */
+.authx-id-pic-glow{
+  box-shadow: 0 0 0 2px rgba(246,163,0,0.50), 0 0 14px rgba(246,163,0,0.40) !important;
+  border:2px solid rgba(246,163,0,0.35) !important;
+}
+
+.authx-id-info{ text-align:left; flex:1; min-width:0; }
+
+.authx-id-name{ font-weight:800; font-size:13px; color:var(--ax-ink); line-height:1.2; }
+/* Brighter name text */
+.authx-id-name-bright{
+  color:#ffffff !important;
+  font-size:14px !important;
+  font-weight:800 !important;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.8) !important;
+}
+
+.authx-id-uid{ font-size:10.5px; color:var(--ax-ink-dim); font-family:var(--font-mono); }
+/* Brighter uid text */
+.authx-id-uid-bright{
+  color:rgba(255,194,71,0.95) !important;
+  font-size:11px !important;
+  font-weight:600 !important;
+}
+
+.authx-id-badge{
+  font-size:10px; font-weight:700; color:#3ddc97; background:rgba(61,220,151,0.12);
+  padding:3px 8px; border-radius:999px; flex-shrink:0;
+}
+/* Pulsing online badge */
+.authx-id-badge-pulse{
+  background: rgba(61,220,151,0.20) !important;
+  border: 1px solid rgba(61,220,151,0.45) !important;
+  color:#5effbf !important;
+  font-weight:800 !important;
+  box-shadow: 0 0 8px rgba(61,220,151,0.35) !important;
+  animation: axBadgePulse 2.5s ease-in-out infinite;
+}
+@keyframes axBadgePulse{
+  0%,100%{ box-shadow: 0 0 6px rgba(61,220,151,0.3); }
+  50%{ box-shadow: 0 0 16px rgba(61,220,151,0.65); }
+}
+
+/* ---- Greeting box ---- */
+.authx-greeting{
+  max-width:600px; width:100%; margin:0 auto; background:var(--ax-card); border:1px solid var(--ax-card-border);
+  border-radius:16px; padding:10px 18px; box-shadow:var(--ax-shadow-soft); backdrop-filter:blur(16px);
+  font-size:12.5px; font-weight:700; color:var(--ax-ink);
+}
+/* Premium greeting box */
+.authx-greeting-premium{
+  background: rgba(30, 27, 20, 0.90) !important;
+  border: 1.5px solid rgba(246,163,0,0.30) !important;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.55) !important;
+}
+.authx-greeting-text{
+  color:#ffffff !important;
+  font-size:13.5px !important;
+  font-weight:700 !important;
+}
+.authx-greeting-sub{ font-weight:500; font-size:11px; color:rgba(255,255,255,0.60); margin-top:2px; }
+
+.authx-house-grid{
+  display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin:0; width:100%;
+}
+.authx-house-card{
+  background:var(--ax-card); border:1px solid var(--ax-card-border); border-radius:13px;
+  padding:8px 6px; box-shadow:0 6px 18px rgba(0,0,0,0.35);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; backdrop-filter:blur(12px);
+  animation: axHouseCardFloat 5s ease-in-out infinite;
+}
+.authx-house-card:nth-child(3n+1){ animation-delay:0s; }
+.authx-house-card:nth-child(3n+2){ animation-delay:.5s; }
+.authx-house-card:nth-child(3n+3){ animation-delay:1s; }
+@keyframes axHouseCardFloat{
+  0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-3px); }
+}
+.authx-house-card:hover{
+  transform:translateY(-6px) scale(1.03); box-shadow:0 16px 32px rgba(246,163,0,0.22);
+  border-color:rgba(246,163,0,0.45);
+}
+.authx-house-icon{
+  display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px;
+  border-radius:9px; background:var(--ax-gradient); font-size:13px; margin-bottom:4px;
+  box-shadow:0 5px 14px rgba(246,163,0,0.35);
+}
+.authx-house-name{ font-weight:700; font-size:10.5px; color:var(--ax-ink); line-height:1.2; }
+.authx-house-desc{ font-size:9px; color:var(--ax-ink-dim); margin-top:1px; display:none; }
+
+.authx-enter-btn{
+  padding:12px 36px !important; font-size:14.5px !important; margin-top:2px;
+  animation: axPulse 2.4s ease-in-out infinite;
+}
+@keyframes axPulse{
+  0%,100%{ box-shadow:0 12px 28px rgba(246,163,0,0.35); }
+  50%{ box-shadow:0 18px 42px rgba(246,163,0,0.6); }
+}
+
+/* Extra headroom on short laptop screens (~700-750px tall) */
+@media (max-height:760px){
+  .authx-city-hero{ gap:7px; }
+  .authx-city-avatar-wrap{ width:44px; height:44px; font-size:20px; border-radius:14px; }
+  .authx-house-grid{ gap:6px; }
+  .authx-house-card{ padding:6px 4px; }
+  .authx-house-icon{ width:22px; height:22px; font-size:11px; margin-bottom:2px; }
+  .authx-house-name{ font-size:9.5px; }
+  .authx-greeting{ padding:8px 16px; }
+}
+@media (max-height:640px){
+  #intro{ padding:10px 16px; }
+  .authx-city-sub{ display:none; }
+  .authx-id-card{ display:none; } /* keep required id in DOM but hide visually on very short screens */
+  .authx-house-card{ padding:5px 3px; }
+  .authx-house-name{ font-size:9px; }
+}
+
+/* ---------------------------------------------------------------
+   Accessibility — visible keyboard focus states throughout auth UI
+   --------------------------------------------------------------- */
+#landing .btn:focus-visible, #signup .btn:focus-visible, #login .btn:focus-visible,
+#forgot .btn:focus-visible, #intro .btn:focus-visible,
+.authx-field input:focus-visible, .authx-field textarea:focus-visible,
+.authx-id-card:focus-visible, .authx-house-card:focus-visible{
+  outline:2px solid var(--ax-accent-2); outline-offset:3px;
+}
+
+/* ---------------------------------------------------------------
+   Responsive
+   --------------------------------------------------------------- */
+@media (max-width:900px){
+  .authx-shell{ grid-template-columns:1fr; }
+  .authx-illustration{ min-height:220px; padding:34px 26px; }
+  .authx-desc{ font-size:13.5px; }
+  .authx-skyline{ height:36%; }
+  #signup .authx-shell, #login .authx-shell{ grid-template-columns:1fr; }
+  #signup .authx-panel-wrap, #login .authx-panel-wrap{ order:1; }
+  #signup .authx-illustration, #login .authx-illustration{ order:2; min-height:160px; }
+  .authx-house-grid{ grid-template-columns:repeat(2, 1fr); }
+}
+@media (max-width:640px){
+  .authx-two-col{ grid-template-columns:1fr; }
+  .authx-panel, .authx-form-card{ padding:28px 22px 24px; border-radius:22px; }
+  .authx-house-grid{ grid-template-columns:repeat(2, 1fr); }
+  .authx-feature-grid{ gap:8px; }
+}
+@media (max-width:420px){
+  .authx-house-grid{ grid-template-columns:1fr 1fr; }
+}

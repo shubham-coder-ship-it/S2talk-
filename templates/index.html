@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>S2 Talk — Learn. Connect. Grow.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth-redesign.css') }}">
+</head>
+<body>
+
+<!-- ============================================================
+     GLOBAL ANIMATION OVERLAYS
+     ============================================================ -->
+
+<!-- 1. Auth Loading Overlay (Signup & Login) -->
+<div id="auth-loading-overlay">
+  <div class="auth-loader-container loader">
+    <div class="inner one"></div>
+    <div class="inner two"></div>
+    <div class="inner three"></div>
+  </div>
+</div>
+
+<!-- 2. City Loading Overlay (Enter City) — blueprint pen-drawing animation -->
+<div id="city-loading-overlay">
+  <div class="cbp-stage">
+    <svg class="cbp-svg" viewBox="0 0 400 230" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="cbpGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+          <path d="M20 0 L0 0 0 20" fill="none" stroke="#4F7DFF" stroke-width="0.6"/>
+        </pattern>
+      </defs>
+      <rect class="cbp-grid-rect" x="0" y="0" width="400" height="230" fill="url(#cbpGrid)"/>
+
+      <g class="cbp-roads" fill="none" stroke="#7B61FF" stroke-width="5" stroke-linecap="round">
+        <path class="cbp-road cbp-r1" pathLength="100" d="M15,150 H385"/>
+        <path class="cbp-road cbp-r2" pathLength="100" d="M140,20 V210"/>
+        <path class="cbp-road cbp-r3" pathLength="100" d="M280,20 V210"/>
+      </g>
+
+      <g class="cbp-building cbp-bA">
+        <path class="cbp-outline" pathLength="100" fill="none" stroke="#4F7DFF" stroke-width="2.6" d="M40,150 L40,95 L75,78 L110,95 L110,150 Z"/>
+        <path class="cbp-fill" fill="#7B61FF" d="M40,150 L40,95 L75,78 L110,95 L110,150 Z"/>
+        <rect class="cbp-window" x="55" y="112" width="10" height="10" fill="#FFE38A"/>
+        <rect class="cbp-window" x="85" y="112" width="10" height="10" fill="#FFE38A"/>
+      </g>
+
+      <g class="cbp-building cbp-bB">
+        <path class="cbp-outline" pathLength="100" fill="none" stroke="#4F7DFF" stroke-width="2.6" d="M170,150 L170,65 L210,45 L250,65 L250,150 Z"/>
+        <path class="cbp-fill" fill="#4F7DFF" d="M170,150 L170,65 L210,45 L250,65 L250,150 Z"/>
+        <rect class="cbp-window" x="188" y="82" width="11" height="11" fill="#FFE38A"/>
+        <rect class="cbp-window" x="221" y="82" width="11" height="11" fill="#FFE38A"/>
+        <rect class="cbp-window" x="188" y="105" width="11" height="11" fill="#FFE38A"/>
+        <rect class="cbp-window" x="221" y="105" width="11" height="11" fill="#FFE38A"/>
+      </g>
+
+      <g class="cbp-building cbp-bC">
+        <path class="cbp-outline" pathLength="100" fill="none" stroke="#4F7DFF" stroke-width="2.6" d="M310,150 L310,100 L340,84 L370,100 L370,150 Z"/>
+        <path class="cbp-fill" fill="#FF5FA2" d="M310,150 L310,100 L340,84 L370,100 L370,150 Z"/>
+        <rect class="cbp-window" x="323" y="115" width="10" height="10" fill="#FFE38A"/>
+        <rect class="cbp-window" x="347" y="115" width="10" height="10" fill="#FFE38A"/>
+      </g>
+
+      <g class="cbp-decor">
+        <text class="cbp-emoji cbp-tree1" x="18" y="185">🌳</text>
+        <text class="cbp-emoji cbp-tree2" x="255" y="188">🌳</text>
+        <text class="cbp-emoji cbp-car" x="150" y="157">🚗</text>
+        <text class="cbp-emoji cbp-lamp1" x="128" y="160">💡</text>
+        <text class="cbp-emoji cbp-lamp2" x="268" y="160">💡</text>
+        <text class="cbp-emoji cbp-cloud1" x="60" y="35">☁️</text>
+        <text class="cbp-emoji cbp-cloud2" x="330" y="28">☁️</text>
+      </g>
+
+      <text class="cbp-pen" x="15" y="150">✏️</text>
+    </svg>
+
+    <div class="cbp-logo">S2 <span>TALK</span></div>
+    <div class="cbp-progress-track"><div class="cbp-progress-fill"></div></div>
+    <div class="cbp-caption"><span id="city-loader-pct">0</span>% · Building your city…</div>
+  </div>
+</div>
+
+<!-- 3. Premium Success Overlay -->
+<div id="success-overlay">
+  <div class="success-particles">
+    <!-- Particles injected via JS -->
+  </div>
+  <div class="success-blob">
+    <svg class="success-svg" viewBox="0 0 50 50">
+      <path d="M 14 27 L 22 35 L 38 16"></path>
+    </svg>
+  </div>
+  <div class="success-text" id="success-message">Success</div>
+</div>
+
+<!-- 4. Global Custom Confirm Modal -->
+<div id="custom-confirm-overlay" style="display:none; position:fixed; inset:0; z-index:999998; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); align-items:center; justify-content:center; opacity:0; transition:opacity 0.2s;">
+  <div id="custom-confirm-box" style="background:var(--bg1, #161b22); border:1px solid var(--border, #30363d); border-radius:12px; padding:24px; max-width:400px; width:90%; text-align:center; transform:scale(0.95); transition:transform 0.2s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.2s; opacity:0;">
+    <h3 id="custom-confirm-title" style="margin:0 0 12px 0; color:var(--text, #fff); font-size:18px;">Confirm</h3>
+    <p id="custom-confirm-msg" style="margin:0 0 24px 0; color:var(--text-sub, #8b949e); font-size:14px;">Are you sure?</p>
+    <div style="display:flex; gap:12px; justify-content:center;">
+      <button class="btn btn-ghost" id="custom-confirm-cancel" style="flex:1;">Cancel</button>
+      <button class="btn btn-primary" id="custom-confirm-yes" style="flex:1; background:#FF6F5E; border-color:#FF6F5E;">Yes, Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MAIN APP  (hidden behind loader until transition completes)
+     ============================================================ -->
+<div id="app">
+
+  <!-- ============ LANDING ============ -->
+  <div class="screen active" id="landing">
+    <div class="authx-shell">
+
+      <div class="authx-illustration">
+        <div class="authx-blob authx-blob-a"></div>
+        <div class="authx-blob authx-blob-b"></div>
+        <div class="authx-blob authx-blob-c"></div>
+        <div class="authx-particles">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="authx-skyline" aria-hidden="true">
+          <div class="authx-building" style="--h:70px;--w:34px;--d:.05s"></div>
+          <div class="authx-building" style="--h:120px;--w:44px;--d:.15s"></div>
+          <div class="authx-building" style="--h:90px;--w:36px;--d:.1s"></div>
+          <div class="authx-building" style="--h:160px;--w:50px;--d:.25s"></div>
+          <div class="authx-building" style="--h:100px;--w:38px;--d:.2s"></div>
+          <div class="authx-building" style="--h:135px;--w:46px;--d:.3s"></div>
+          <div class="authx-building" style="--h:80px;--w:34px;--d:.12s"></div>
+        </div>
+        <div class="authx-illustration-copy">
+          <div class="authx-eyebrow">WELCOME TO</div>
+          <h1 class="authx-title">S2 <span>Talk</span></h1>
+          <p class="authx-desc">Develop skills, connect with friends, prepare for interviews, and grow together.</p>
+          <div class="authx-feature-grid">
+            <div class="authx-feature"><span class="authx-feature-icon">🎤</span>Interview</div>
+            <div class="authx-feature"><span class="authx-feature-icon">💻</span>Projects</div>
+            <div class="authx-feature"><span class="authx-feature-icon">💬</span>Chat</div>
+            <div class="authx-feature"><span class="authx-feature-icon">👥</span>Friends</div>
+            <div class="authx-feature"><span class="authx-feature-icon">🤖</span>AI</div>
+            <div class="authx-feature"><span class="authx-feature-icon">🎮</span>Games</div>
+            <div class="authx-feature"><span class="authx-feature-icon">📊</span>Results</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="authx-panel-wrap">
+        <div class="authx-panel" id="authx-landing-panel">
+          <div class="authx-logo-badge">S2</div>
+          <h2 class="authx-panel-title">Welcome to S2 <span>Talk</span></h2>
+          <div class="sub authx-panel-desc">Develop skills, connect with friends, prepare for interviews, and grow together with people from around the world.</div>
+          <div class="btn-row authx-btn-row">
+            <button class="btn btn-primary" id="go-signup">Create Account</button>
+            <button class="btn btn-outline" id="go-login">Login</button>
+          </div>
+          <div id="landing-footer" class="authx-footer">Built by S. Sharma</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ SIGNUP ============ -->
+  <div class="screen" id="signup">
+    <div class="authx-shell">
+
+      <div class="authx-illustration">
+        <div class="authx-blob authx-blob-a"></div>
+        <div class="authx-blob authx-blob-b"></div>
+        <div class="authx-particles">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="authx-illustration-copy">
+          <div class="authx-eyebrow">GET STARTED</div>
+          <h1 class="authx-title">Join S2 <span>Talk</span></h1>
+          <p class="authx-desc">Build your profile, prepare for interviews, collaborate on projects, and grow your career with the S2 AI Agent by your side.</p>
+          <div class="authx-feature-grid">
+            <div class="authx-feature"><span class="authx-feature-icon">🤖</span>AI Coach</div>
+            <div class="authx-feature"><span class="authx-feature-icon">📄</span>Smart Resume</div>
+            <div class="authx-feature"><span class="authx-feature-icon">🏙️</span>Your City</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="authx-panel-wrap">
+        <div class="authx-form-card">
+          <h2>Create your account</h2>
+          <div class="hint">Your profile powers the AI Interview coach and your city avatar.</div>
+
+          <div class="authx-avatar-row">
+            <div class="avatar-preview authx-avatar-preview" id="signup-avatar-preview">🙂</div>
+            <div style="flex:1;">
+              <label class="authx-avatar-upload-label">Profile picture (optional)</label>
+              <input type="file" id="su-pic" accept="image/*" class="authx-file-btn">
+            </div>
+          </div>
+
+          <div class="authx-two-col">
+            <div class="authx-field">
+              <label>Name</label>
+              <div class="authx-input-wrap">
+                <span class="authx-input-icon">👤</span>
+                <input type="text" id="su-name" placeholder="e.g. Riya Kapoor">
+              </div>
+            </div>
+            <div class="authx-field">
+              <label>Email</label>
+              <div class="authx-input-wrap">
+                <span class="authx-input-icon">✉️</span>
+                <input type="email" id="su-email" placeholder="you@example.com">
+              </div>
+            </div>
+          </div>
+
+          <div class="authx-field">
+            <label>Password</label>
+            <div class="authx-input-wrap authx-pw-wrap">
+              <span class="authx-input-icon">🔒</span>
+              <input type="password" id="su-pass" placeholder="At least 6 characters" autocomplete="new-password">
+              <button type="button" class="authx-pw-toggle" id="su-pass-toggle" aria-label="Show password" tabindex="-1">👁️</button>
+            </div>
+          </div>
+
+          <div class="authx-field">
+            <label>Resume (PDF/DOCX, optional)</label>
+            <input type="file" id="su-resume" accept=".pdf,.doc,.docx" class="authx-file-btn">
+            <div class="sub" id="su-resume-status" style="margin-top:6px;"></div>
+          </div>
+
+          <div class="authx-field">
+            <label>City (optional)</label>
+            <div class="authx-input-wrap">
+              <span class="authx-input-icon">📍</span>
+              <input type="text" id="su-city" placeholder="e.g. Bengaluru">
+            </div>
+          </div>
+
+          <div class="authx-field">
+            <label>Skills &amp; interests</label>
+            <div class="authx-input-wrap">
+              <span class="authx-input-icon">🛠️</span>
+              <input type="text" id="su-skills" placeholder="e.g. Python, React, UI Design, DSA">
+            </div>
+          </div>
+
+          <div class="authx-field">
+            <label>Resume / bio summary — used by the AI Interview &amp; AI Agent (auto-filled from your resume, editable)</label>
+            <textarea class="ta" id="su-bio" rows="4" placeholder="Paste a short summary of your background so the AI can personalize interviews and advice."></textarea>
+          </div>
+
+          <div class="err authx-err" id="su-err"></div>
+          <button class="btn btn-primary" id="su-submit" style="width:100%;">Create Account</button>
+          <div class="switch-line authx-switch-line">Already have an account? <a id="su-to-login">Log in</a></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ LOGIN ============ -->
+  <div class="screen" id="login">
+    <div class="authx-shell">
+
+      <div class="authx-illustration">
+        <div class="authx-blob authx-blob-a"></div>
+        <div class="authx-blob authx-blob-b"></div>
+        <div class="authx-particles">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="authx-skyline" aria-hidden="true">
+          <div class="authx-building" style="--h:60px;--w:32px;--d:.05s"></div>
+          <div class="authx-building" style="--h:110px;--w:42px;--d:.15s"></div>
+          <div class="authx-building" style="--h:85px;--w:34px;--d:.1s"></div>
+          <div class="authx-building" style="--h:145px;--w:48px;--d:.25s"></div>
+          <div class="authx-building" style="--h:95px;--w:36px;--d:.2s"></div>
+        </div>
+        <div class="authx-illustration-copy">
+          <div class="authx-eyebrow">GOOD TO SEE YOU</div>
+          <h1 class="authx-title">Welcome <span>Back</span></h1>
+          <p class="authx-desc">Continue building your career — your city, friends, and AI coach are right where you left them.</p>
+        </div>
+      </div>
+
+      <div class="authx-panel-wrap">
+        <div class="authx-form-card">
+          <h2>Welcome back</h2>
+          <div class="hint">Log in to re-enter the city.</div>
+
+          <div class="authx-field">
+            <label>Email</label>
+            <div class="authx-input-wrap">
+              <span class="authx-input-icon">✉️</span>
+              <input type="email" id="li-email" placeholder="you@example.com">
+            </div>
+          </div>
+
+          <div class="authx-field">
+            <label>Password</label>
+            <div class="authx-input-wrap authx-pw-wrap">
+              <span class="authx-input-icon">🔒</span>
+              <input type="password" id="li-pass" placeholder="Your password">
+              <button type="button" class="authx-pw-toggle" id="li-pass-toggle" aria-label="Show password" tabindex="-1">👁️</button>
+            </div>
+          </div>
+
+          <div class="err authx-err" id="li-err"></div>
+          <button class="btn btn-primary" id="li-submit" style="width:100%;">Login</button>
+          <div class="switch-line authx-switch-line"><a id="li-to-forgot">Forgot password?</a></div>
+          <div class="switch-line authx-switch-line">New here? <a id="li-to-signup">Create an account</a></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ FORGOT PASSWORD ============ -->
+  <div class="screen" id="forgot">
+    <div class="authx-form-card">
+      <div class="authx-logo-badge">🔑</div>
+      <h2>Reset your password</h2>
+
+      <div id="fp-step-email">
+        <div class="hint">Enter your account email — we'll send a 6-digit code.</div>
+        <div class="authx-field">
+          <label>Email</label>
+          <div class="authx-input-wrap">
+            <span class="authx-input-icon">✉️</span>
+            <input type="email" id="fp-email" placeholder="you@example.com">
+          </div>
+        </div>
+        <div class="err authx-err" id="fp-email-err"></div>
+        <button class="btn btn-primary" id="fp-send-otp" style="width:100%;">Send OTP</button>
+      </div>
+
+      <div id="fp-step-otp" style="display:none;">
+        <div class="hint">Enter the 6-digit code sent to <span id="fp-email-echo"></span>.</div>
+        <div class="authx-field">
+          <label>OTP Code</label>
+          <div class="authx-input-wrap">
+            <span class="authx-input-icon">🔢</span>
+            <input type="text" id="fp-otp" maxlength="6" placeholder="123456">
+          </div>
+        </div>
+        <div class="sub authx-otp-timer" id="fp-timer">Code expires in 10:00</div>
+        <div class="err authx-err" id="fp-otp-err"></div>
+        <button class="btn btn-primary" id="fp-verify-otp" style="width:100%;">Verify Code</button>
+        <div class="switch-line authx-switch-line"><a id="fp-resend-otp">Resend OTP</a></div>
+      </div>
+
+      <div id="fp-step-reset" style="display:none;">
+        <div class="hint">Create a new password.</div>
+        <div class="authx-field">
+          <label>New password (min 6 chars)</label>
+          <div class="authx-input-wrap authx-pw-wrap">
+            <span class="authx-input-icon">🔒</span>
+            <input type="password" id="fp-new-pass">
+            <button type="button" class="authx-pw-toggle" id="fp-new-pass-toggle" aria-label="Show password" tabindex="-1">👁️</button>
+          </div>
+        </div>
+        <div class="authx-field">
+          <label>Confirm new password</label>
+          <div class="authx-input-wrap authx-pw-wrap">
+            <span class="authx-input-icon">🔒</span>
+            <input type="password" id="fp-confirm-pass">
+            <button type="button" class="authx-pw-toggle" id="fp-confirm-pass-toggle" aria-label="Show password" tabindex="-1">👁️</button>
+          </div>
+        </div>
+        <div class="err authx-err" id="fp-reset-err"></div>
+        <button class="btn btn-primary" id="fp-reset-submit" style="width:100%;">Reset Password &amp; Login</button>
+      </div>
+
+      <div class="switch-line authx-switch-line"><a id="fp-back-to-login">← Back to login</a></div>
+    </div>
+  </div>
+
+
+  <!-- ============ INTRO ============ -->
+  <div class="screen" id="intro">
+    <!-- Animated background blobs -->
+    <div class="authx-blob authx-blob-a" style="position:absolute;top:-80px;left:-60px;"></div>
+    <div class="authx-blob authx-blob-b" style="position:absolute;bottom:-40px;right:-40px;"></div>
+    <div class="authx-blob" style="position:absolute;top:40%;right:-80px;width:200px;height:200px;animation-duration:13s;animation-delay:2s;"></div>
+
+    <div class="authx-city-hero">
+      <!-- Glowing city avatar -->
+      <div class="authx-city-avatar-glow-wrap">
+        <div class="authx-city-avatar-glow-ring"></div>
+        <div class="hologram authx-city-avatar-wrap" id="intro-avatar-wrap">🏙️</div>
+      </div>
+
+      <div class="authx-city-title" id="intro-title">Your City Awaits</div>
+      <div class="authx-city-sub" id="intro-sub">S2 TALK &nbsp;·&nbsp; NINE BUILDINGS &nbsp;·&nbsp; ONE COMMUNITY</div>
+
+      <!-- User identity card — high contrast glassmorphism -->
+      <div id="intro-id-card" class="authx-id-card authx-id-card-premium">
+        <div id="intro-pic" class="authx-id-pic authx-id-pic-glow">🙂</div>
+        <div class="authx-id-info">
+          <div id="intro-name" class="authx-id-name authx-id-name-bright">Player</div>
+          <div id="intro-uid" class="authx-id-uid authx-id-uid-bright">ID: S2-000000</div>
+        </div>
+        <div class="authx-id-badge authx-id-badge-pulse">● Online</div>
+      </div>
+
+      <!-- Greeting box -->
+      <div id="intro-box" class="authx-greeting authx-greeting-premium">
+        <span id="intro-greeting" class="authx-greeting-text">Welcome!</span>
+        <div class="authx-greeting-sub">Drive or walk between nine buildings to grow your career.</div>
+      </div>
+
+      <!-- Building grid -->
+      <div class="authx-house-grid">
+        <div class="authx-house-card"><div class="authx-house-icon">🎤</div><div class="authx-house-name">Interview House</div><div class="authx-house-desc">Practice with AI</div></div>
+        <div class="authx-house-card"><div class="authx-house-icon">📚</div><div class="authx-house-name">Skills House</div><div class="authx-house-desc">Level up your craft</div></div>
+        <div class="authx-house-card"><div class="authx-house-icon">💻</div><div class="authx-house-name">Projects Lab</div><div class="authx-house-desc">Build &amp; run code</div></div>
+        <div class="authx-house-card"><div class="authx-house-icon">📊</div><div class="authx-house-name">Results House</div><div class="authx-house-desc">Track your progress</div></div>
+        <div class="authx-house-card"><div class="authx-house-icon">🤖</div><div class="authx-house-name">AI Agent</div><div class="authx-house-desc">Your career copilot</div></div>
+        <div class="authx-house-card"><div class="authx-house-icon">💬</div><div class="authx-house-name">Talk House</div><div class="authx-house-desc">Chat with friends</div></div>
+        <div class="authx-house-card"><div class="authx-house-icon">👥</div><div class="authx-house-name">Contacts</div><div class="authx-house-desc">Grow your network</div></div>
+        <div class="authx-house-card"><div class="authx-house-icon">⚙️</div><div class="authx-house-name">Settings</div><div class="authx-house-desc">About &amp; preferences</div></div>
+        <div class="authx-house-card"><div class="authx-house-icon">🎮</div><div class="authx-house-name">Play House</div><div class="authx-house-desc">Take a fun break</div></div>
+      </div>
+
+      <button class="btn btn-primary authx-enter-btn" id="start-btn">▶ Enter the City</button>
+    </div>
+  </div>
+
+  <!-- ============ GAME ============ -->
+  <div class="screen" id="game">
+    <div id="world-wrap">
+      <canvas id="world" width="900" height="600"></canvas>
+      <div id="prompt-enter">PRESS ENTER TO ENTER</div>
+    </div>
+    <div id="hud-top">
+      <div id="hud-title">S2 Talk // <span id="area-label">City Overworld</span> &nbsp; <span id="xp-badge">⭐ Lv.1 · 0 XP · 🪙0</span></div>
+      <button id="hud-profile-chip" title="Open your profile">
+        <span id="hud-profile-pic">🙂</span>
+        <span id="hud-profile-text"><span id="hud-profile-name">Player</span><small id="hud-profile-uid">S2-000000</small></span>
+      </button>
+      <div id="hud-controls">
+        <button class="hud-btn" id="mission-btn" title="Daily Missions">🎯</button>
+        <button class="hud-btn" id="ach-btn" title="Achievements">🏆</button>
+        <button class="hud-btn" id="notif-btn" title="Notifications">🔔<span class="notif-count" id="notif-count" style="display:none;">0</span></button>
+        <button class="hud-btn" id="mute-btn" title="Toggle music">🔊</button>
+        <button class="hud-btn" id="daynight-btn" title="Toggle day/night">🌙</button>
+      </div>
+    </div>
+    <div id="hud-bottom"><kbd>WASD</kbd>/<kbd>Arrows</kbd> move &nbsp; <kbd>ENTER</kbd> enter &nbsp; <kbd>C</kbd> car mode &nbsp; <kbd>1-9</kbd> fast travel &nbsp; <kbd>R</kbd> rain</div>
+    <!-- Mobile touch controls (draggable D-pad) -->
+    <div id="touch-controls" aria-label="Mobile touch controls">
+      <div id="touch-controls-bar">
+        <div id="touch-controls-handle" aria-label="Drag to move controls">⠿</div>
+        <button id="touch-controls-toggle" aria-label="Minimize controls">–</button>
+      </div>
+      <div id="touch-dpad">
+        <button class="touch-btn touch-up" data-key="w" aria-label="Up">▲</button>
+        <div class="touch-mid-row">
+          <button class="touch-btn touch-left" data-key="a" aria-label="Left">◀</button>
+          <button class="touch-btn touch-enter" id="touch-enter-btn" aria-label="Enter Building">⬆<br><small>Enter</small></button>
+          <button class="touch-btn touch-right" data-key="d" aria-label="Right">▶</button>
+        </div>
+        <button class="touch-btn touch-down" data-key="s" aria-label="Down">▼</button>
+      </div>
+    </div>
+
+    <!-- Floating quick-action buttons: Car / Rain / Home -->
+    <div id="touch-action-btns" aria-label="Quick actions">
+      <button class="touch-btn touch-action" id="touch-car-btn" aria-label="Car Mode">🚗<br><small>Car</small></button>
+      <button class="touch-btn touch-action" id="touch-rain-btn" aria-label="Rain">🌧️<br><small>Rain</small></button>
+      <button class="touch-btn touch-action" id="touch-home-btn" aria-label="Return to City">🏠<br><small>Home</small></button>
+    </div>
+    <div id="toast-wrap"></div>
+  </div>
+
+  <!-- ============ MODAL ============ -->
+  <div id="modal-overlay">
+    <div id="modal">
+      <button id="modal-close">✕</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+</div><!-- /#app -->
+
+<script src="{{ url_for('static', filename='config/audio.js') }}"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script src="{{ url_for('static', filename='js/enhancements.js') }}"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  window.AnimationManager = {
+    showAuthLoader: function(onComplete) {
+      const overlay = document.getElementById('auth-loading-overlay');
+      overlay.classList.add('active');
+      
+      // Keep visible for 3-5s (we'll use 4s)
+      setTimeout(() => {
+        overlay.classList.remove('active');
+        if (onComplete) {
+          setTimeout(onComplete, 500); // wait for fade out
+        }
+      }, 4000);
+    },
+
+    showCityLoader: function(onComplete) {
+      const overlay = document.getElementById('city-loading-overlay');
+      const pctEl = document.getElementById('city-loader-pct');
+      overlay.classList.add('active');
+
+      // Percentage counter synced with the blueprint/pen drawing animation below
+      const totalMs = 3800;
+      const startedAt = performance.now();
+      let pctTimer = null;
+      if (pctEl) {
+        pctEl.textContent = '0';
+        pctTimer = setInterval(() => {
+          const pct = Math.min(100, Math.round(((performance.now() - startedAt) / totalMs) * 100));
+          pctEl.textContent = String(pct);
+          if (pct >= 100) clearInterval(pctTimer);
+        }, 60);
+      }
+
+      // Keep visible for the full blueprint -> roads -> buildings -> logo sequence (~3.8s)
+      setTimeout(() => {
+        overlay.classList.remove('active');
+        if (pctTimer) clearInterval(pctTimer);
+        if (onComplete) {
+          setTimeout(onComplete, 400); // wait for fade out
+        }
+      }, totalMs);
+    },
+
+    showSuccess: function(message, onComplete) {
+      const overlay = document.getElementById('success-overlay');
+      const textEl = document.getElementById('success-message');
+      const particlesContainer = overlay.querySelector('.success-particles');
+      
+      textEl.textContent = '✓ ' + (message || 'Success');
+      
+      // Inject particles
+      particlesContainer.innerHTML = '';
+      for(let i=0; i<12; i++) {
+        const p = document.createElement('div');
+        p.className = 'success-particle';
+        const angle = (i / 12) * Math.PI * 2;
+        const dist = 60 + Math.random() * 40;
+        p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+        p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+        particlesContainer.appendChild(p);
+      }
+      
+      overlay.classList.add('active');
+      
+      // Keep visible for ~1.5s total then fade out
+      setTimeout(() => {
+        overlay.classList.remove('active');
+        if (onComplete) {
+          setTimeout(onComplete, 300); // wait for fade out
+        }
+      }, 1800);
+    },
+
+    showConfirm: function(title, message, successMessage, onConfirm) {
+      const overlay = document.getElementById('custom-confirm-overlay');
+      const box = document.getElementById('custom-confirm-box');
+      const btnYes = document.getElementById('custom-confirm-yes');
+      const btnCancel = document.getElementById('custom-confirm-cancel');
+      
+      document.getElementById('custom-confirm-title').textContent = title || 'Confirm';
+      document.getElementById('custom-confirm-msg').textContent = message || 'Are you sure?';
+      
+      overlay.style.display = 'flex';
+      // Trigger reflow
+      void overlay.offsetWidth;
+      overlay.style.opacity = '1';
+      box.style.opacity = '1';
+      box.style.transform = 'scale(1)';
+
+      const closeDialog = () => {
+        overlay.style.opacity = '0';
+        box.style.opacity = '0';
+        box.style.transform = 'scale(0.95)';
+        setTimeout(() => { overlay.style.display = 'none'; }, 200);
+      };
+
+      btnCancel.onclick = closeDialog;
+      btnYes.onclick = () => {
+        closeDialog();
+        // Wait for fade out, then show success animation, then run callback
+        setTimeout(() => {
+          window.AnimationManager.showSuccess(successMessage, onConfirm);
+        }, 200);
+      };
+    }
+  };
+
+  window.showCustomConfirm = window.AnimationManager.showConfirm;
+
+  // Backwards compatibility for loginAs
+  window.runS2Loader = window.AnimationManager.showAuthLoader;
+
+})();
+</script>
+
+<!-- ============================================================
+     AUTH/WELCOME REDESIGN — purely additive UI polish.
+     Does not touch app.js, Flask routes, or any existing element ID's
+     behavior; only adds cosmetic interactions (password eye toggle,
+     button ripple, loading-spinner sync, gentle parallax).
+     ============================================================ -->
+<script>
+(function () {
+  'use strict';
+
+  /* ---- 1. Password show/hide eye toggles ---- */
+  [
+    ['su-pass-toggle', 'su-pass'],
+    ['li-pass-toggle', 'li-pass'],
+    ['fp-new-pass-toggle', 'fp-new-pass'],
+    ['fp-confirm-pass-toggle', 'fp-confirm-pass']
+  ].forEach(function (pair) {
+    var btn = document.getElementById(pair[0]);
+    var input = document.getElementById(pair[1]);
+    if (!btn || !input) return;
+    btn.addEventListener('click', function () {
+      var showing = input.type === 'text';
+      input.type = showing ? 'password' : 'text';
+      btn.textContent = showing ? '👁️' : '🙈';
+      btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+    });
+  });
+
+  /* ---- 2. Gradient button ripple (auth/welcome screens only) ---- */
+  ['landing', 'signup', 'login', 'forgot', 'intro'].forEach(function (screenId) {
+    var screen = document.getElementById(screenId);
+    if (!screen) return;
+    screen.addEventListener('click', function (e) {
+      var btn = e.target.closest('.btn');
+      if (!btn || !screen.contains(btn)) return;
+      var rect = btn.getBoundingClientRect();
+      btn.style.setProperty('--rx', (e.clientX - rect.left) + 'px');
+      btn.style.setProperty('--ry', (e.clientY - rect.top) + 'px');
+      btn.classList.remove('ax-rippling');
+      // force reflow so the animation can restart on rapid clicks
+      void btn.offsetWidth;
+      btn.classList.add('ax-rippling');
+      setTimeout(function () { btn.classList.remove('ax-rippling'); }, 600);
+    });
+  });
+
+  /* ---- 3. Loading-spinner sync — watches the `disabled` attribute that
+     app.js already toggles on submit buttons, and mirrors it onto a
+     cosmetic class so the button shows a spinner while busy. ---- */
+  ['su-submit', 'li-submit', 'fp-send-otp', 'fp-verify-otp', 'fp-reset-submit'].forEach(function (id) {
+    var btn = document.getElementById(id);
+    if (!btn || !window.MutationObserver) return;
+    var mo = new MutationObserver(function () {
+      btn.classList.toggle('ax-loading', btn.disabled === true);
+    });
+    mo.observe(btn, { attributes: true, attributeFilter: ['disabled'] });
+  });
+
+  /* ---- 4. Gentle mouse parallax on illustration blobs ---- */
+  document.querySelectorAll('.authx-illustration').forEach(function (panel) {
+    panel.addEventListener('mousemove', function (e) {
+      var rect = panel.getBoundingClientRect();
+      var px = (e.clientX - rect.left) / rect.width - 0.5;
+      var py = (e.clientY - rect.top) / rect.height - 0.5;
+      panel.querySelectorAll('.authx-blob').forEach(function (blob, i) {
+        var strength = 14 + i * 6;
+        blob.style.transform = 'translate(' + (px * strength) + 'px,' + (py * strength) + 'px)';
+      });
+    });
+    panel.addEventListener('mouseleave', function () {
+      panel.querySelectorAll('.authx-blob').forEach(function (blob) {
+        blob.style.transform = '';
+      });
+    });
+  });
+
+})();
+</script>
+
+</body>
+</html>
