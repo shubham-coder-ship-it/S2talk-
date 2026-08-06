@@ -299,6 +299,8 @@ For admin account setup, see **[`ADMIN_SETUP.md`](./ADMIN_SETUP.md)**.
 ## 👨‍💻 Author
 Shubham Sharma
 
-GitHub: https://github.com/shubham-coder-ship-it
-LinkedIn: https://www.linkedin.com/in/shubham-sharma-55ab97367
+•GitHub: https://github.com/shubham-coder-ship-it
+
+•LinkedIn: https://www.linkedin.com/in/shubham-sharma-55ab97367
+
 ⭐ If you found this project useful, don't forget to star the repository!
