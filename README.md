@@ -294,3 +294,11 @@ deployment.
 | C/C++ compile fails with an OCI/runtime error | Compiler unavailable in your hosting environment | Install `build-essential` (or platform equivalent), or deploy on a host that allows subprocess execution |
 
 For admin account setup, see **[`ADMIN_SETUP.md`](./ADMIN_SETUP.md)**.
+
+
+## 👨‍💻 Author
+Shubham Sharma
+
+GitHub: https://github.com/shubham-coder-ship-it
+LinkedIn: https://www.linkedin.com/in/shubham-sharma-55ab97367
+⭐ If you found this project useful, don't forget to star the repository!
